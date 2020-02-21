@@ -11,7 +11,7 @@ Snake::Snake(int width, int height) :
 }
 
 Snake::~Snake() { // Start from back of snake (front of queue)
-	SnakeSegment* temp = front, * temp_next = front->next;
+	SnakeSegment* temp = back, * temp_next = back->next;
 	do {
 		delete temp;
 		temp = temp_next;
