@@ -4,7 +4,10 @@ SnakeSegment::SnakeSegment(int _x, int _y): x(_x), y(_y), next(nullptr) {}
 
 Snake::Snake(int width, int height) : 
 	current_dir(Direction::right), growing(false), w(width), h(height) {
-	front = back = new SnakeSegment(ceil(w/2), ceil(h/2));
+	back = new SnakeSegment(ceil(w/2), ceil(h/2));
+	front = new SnakeSegment(ceil(w/2) + 1, ceil(h/2));
+	back->next = front;
+	
 }
 
 Snake::~Snake() { // Start from back of snake (front of queue)
@@ -37,9 +40,22 @@ void Snake::move(Direction move_dir) { // TODO: collison detection
 			new_segment->y++;
 			break;
 	}
+	
+	// Wall collison detection
 	if (new_segment->x < 0 || new_segment->x >= w ||
 		new_segment->y < 0 || new_segment->y >= h)
-		throw std::range_error("Hit wall");
+		throw std::range_error("Snake hit wall");
+
+	// Bite detection
+	else {
+		SnakeSegment* cursor = back;
+		while (cursor) {
+			if (cursor->x == new_segment->x && cursor->y == new_segment->y)
+				throw range_error("Snake bit itself");
+			cursor = cursor->next;
+		}
+	}
+	
 	front->next = new_segment;
 	front = new_segment;
 	if (growing) growing = false;
