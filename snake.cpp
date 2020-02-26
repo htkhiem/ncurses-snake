@@ -82,16 +82,16 @@ void Snake::move(Direction move_dir) {
   current_dir = move_dir;
   
   // Wall collison detection
-  if (new_segment->x < 1 || new_segment->x >= w - 1 || new_segment->y < 1 ||
+  if (new_segment->x < 1 || new_segment->x >= w - 1 || new_segment->y < 0 ||
       new_segment->y >= h + 2)
-    throw std::range_error("Snake hit wall!");
+    throw std::string("Your snake hit a wall!");
 
   // Bite detection
   else {
     SnakeSegment *cursor = back;
     while (cursor) {
       if (cursor->x == new_segment->x && cursor->y == new_segment->y)
-        throw range_error("Snake bit itself!");
+        throw std::string("Your snake bit itself!");
       cursor = cursor->next;
     }
   }

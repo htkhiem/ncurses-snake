@@ -1,9 +1,9 @@
-CC = g++
+CXX = g++
 DEPS = utils.h snake.hpp
-CFLAGS = -I. -O2 -lncursesw
-OBJ = main.o snake.o
+CFLAGS = -I. -O2 -lncurses
+OBJ = main.o snake.o utils.o
 
 %.o: %.cpp $(DEPS)
-	$(CC) -c -o $@ $< $(CFLAGS)
+	$(CXX) -c -o $@ $< $(CFLAGS)
 Snake: $(OBJ)
-	$(CC) -o $@ $^ $(CFLAGS)
+	$(CXX) -o $@ $^ $(CFLAGS)

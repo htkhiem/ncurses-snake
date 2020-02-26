@@ -1,10 +1,18 @@
 #ifndef SNAKE_UTILS
 #define SNAKE_UTILS
-#include <chrono>
 #include <cmath>
+#include <cstdio>
 #include <iostream>
-#include <queue>
-#include <thread>
+#include <cstdlib> // simple rand() will do
+#include <cstring>
+#include <ctime>
+#include <ncurses.h>
+#include <string>
+#include <unistd.h>
+#include <exception>
+
+#define BORDER_COLOUR 1
+#define SNAKE_COLOUR 2
 
 enum class Direction {
   left,
@@ -26,5 +34,7 @@ struct Position {
   Position(int _x, int _y) : x(_x), y(_y) {}
   bool operator==(Position other) { return (x == other.x && y == other.y); }
 };
+
+void DrawBorder(size_t width, size_t height, int score);
 
 #endif // SNAKE_UTILS
