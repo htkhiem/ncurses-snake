@@ -1,32 +1,39 @@
 // Snake game, ncurses version
 #include "snake.hpp"
 #include "utils.h"
+#include <cstdio>
 #include <cstdlib> // simple rand() will do
 #include <cstring>
 #include <ctime>
 #include <ncurses.h>
 #include <string>
 #include <unistd.h>
-#include <cstdio>
 
 #define WIDTH 80
 #define HEIGHT 24
 #define ITR 250
+
+#define BORDER_COLOUR 1
+#define SNAKE_COLOUR 2
 using namespace std; // test
 
-void DrawBorder(WINDOW *main_window, size_t width, size_t height, int score) {
+void DrawBorder(size_t width, size_t height, int score) {
   // Draw border
-  wborder(main_window, ACS_VLINE, ACS_VLINE, ACS_HLINE, ACS_HLINE, ACS_ULCORNER,
-          ACS_URCORNER, ACS_LLCORNER, ACS_LRCORNER);
-
+  move(0, 0);
+  attron(COLOR_PAIR(BORDER_COLOUR));
+  hline(ACS_BLOCK, WIDTH);
+  vline(ACS_BLOCK, HEIGHT + 4);
+  move(0, WIDTH - 1);
+  vline(ACS_BLOCK, HEIGHT + 4);
+  move(HEIGHT + 4, 0);
+  hline(ACS_BLOCK, WIDTH);
+  attroff(COLOR_PAIR(BORDER_COLOUR));
   // Draw title bar
-  mvwprintw(main_window, 1, 1, "Score: ");
-  wprintw(main_window, "%d", score);
+  mvprintw(1, 1, "Score: %d", score);
 
   // Draw horizontal separator
-  mvwaddch(main_window, 2, 0, ACS_LTEE);
-  whline(main_window, ACS_HLINE, width - 1);
-  mvwaddch(main_window, 2, width - 1, ACS_RTEE);
+  move(2,1);
+  hline(ACS_HLINE, width - 2);
 }
 
 int main(int argc, char **argv) {
@@ -39,15 +46,14 @@ int main(int argc, char **argv) {
     printf("Your terminal does not have colour support. Exiting...");
     return 1;
   }
-  
+
   // Window height = playing field height + 2 to accomodate title bar
-  WINDOW *main_window =
-      newwin(HEIGHT + 2, WIDTH, (LINES - HEIGHT) / 2, (COLS - WIDTH) / 2);
-  nodelay(main_window, true); // Snake never stops
+  nodelay(stdscr, true); // Snake never stops
 
   start_color();
-  init_pair(1, COLOR_BLACK, COLOR_RED);
-  
+  init_pair(BORDER_COLOUR, COLOR_WHITE, COLOR_WHITE);
+  init_pair(SNAKE_COLOUR, COLOR_BLACK, COLOR_RED);
+
   char input = 0;
   Snake s(WIDTH, HEIGHT);
   int score = 0; // Starts at snake length = 2
@@ -65,10 +71,10 @@ int main(int argc, char **argv) {
         food_x = rand() % (WIDTH - 3) + 1;
         food_y = rand() % (HEIGHT - 3) + 1;
       } else {
-        wclear(main_window);
+        clear();
 
         // Get input and move snake
-        input = wgetch(main_window);
+        input = getch();
         switch (input) {
         case 'w':
         case 'W':
@@ -109,45 +115,45 @@ int main(int argc, char **argv) {
 
         SnakeSegment *cursor = s.back;
 
-	attron(COLOR_PAIR(1)); // Snake is red-black
+        attron(COLOR_PAIR(SNAKE_COLOUR)); // Snake is red-black
         // Draw snake body
         while (cursor->next) {
-          mvwaddch(main_window, cursor->y + 2, cursor->x, '*');
+          mvaddch(cursor->y + 2, cursor->x, '*');
           cursor = cursor->next;
         }
         // Head drawn last
-        mvwaddch(main_window, cursor->y + 2, cursor->x, head_shape);
-	attroff(COLOR_PAIR(1));
-	
+        mvaddch(cursor->y + 2, cursor->x, head_shape);
+        attroff(COLOR_PAIR(SNAKE_COLOUR));
+
         // Draw food
-        mvwaddch(main_window, food_y + 2, food_x, ACS_DIAMOND);
+        mvaddch(food_y + 2, food_x, ACS_DIAMOND);
 
         // Draw UI
-        DrawBorder(main_window, WIDTH, HEIGHT, score);
+        DrawBorder(WIDTH, HEIGHT, score);
 
         // Refresh
-        wrefresh(main_window);
+        refresh();
         usleep(1000 * ITR);
       }
     }
   } catch (exception &e) {
-    wclear(main_window);
+    clear();
     string game_over = "GAME OVER", why = e.what(),
            instr = "Press any key to exit...";
-    DrawBorder(main_window, WIDTH, HEIGHT, score);
-    mvwprintw(main_window, floor(HEIGHT / 2) - 2,
-              floor((WIDTH - game_over.length()) / 2), game_over.c_str());
-    mvwprintw(main_window, floor(HEIGHT / 2),
-              floor((WIDTH - strlen(e.what())) / 2), e.what());
-    mvwprintw(main_window, floor(HEIGHT / 2) + 2,
-              floor((WIDTH - instr.length()) / 2), instr.c_str());
-    wrefresh(main_window);
+    DrawBorder(WIDTH, HEIGHT, score);
+    mvprintw(floor(HEIGHT / 2) - 2, floor((WIDTH - game_over.length()) / 2),
+             game_over.c_str());
+    mvprintw(floor(HEIGHT / 2), floor((WIDTH - strlen(e.what())) / 2),
+             e.what());
+    mvprintw(floor(HEIGHT / 2) + 2, floor((WIDTH - instr.length()) / 2),
+             instr.c_str());
+    refresh();
     char wait;
     cin >> wait;
     endwin();
     return 0;
   }
-  wgetch(main_window);
+  getch();
   endwin();
   return 0;
 }
