@@ -15,7 +15,6 @@
 
 #define BORDER_COLOUR 1
 #define SNAKE_COLOUR 2
-using namespace std; // test
 
 void DrawBorder(size_t width, size_t height, int score) {
   // Draw border
@@ -32,7 +31,7 @@ void DrawBorder(size_t width, size_t height, int score) {
   mvprintw(1, 1, "Score: %d", score);
 
   // Draw horizontal separator
-  move(2,1);
+  move(2, 1);
   hline(ACS_HLINE, width - 2);
 }
 
@@ -62,7 +61,6 @@ int main(int argc, char **argv) {
   int food_x = rand() % (WIDTH - 3) + 1, food_y = rand() % (HEIGHT - 3) + 1;
 
   try {
-    char head_shape = ACS_RARROW;
     while (input != 'q' && input != 'Q') {
       // Check if snake's eaten the food piece
       if (s.front->x == food_x && s.front->y == food_y) {
@@ -80,7 +78,6 @@ int main(int argc, char **argv) {
         case 'W':
           if (s.current_dir != Direction::down) {
             s.move(Direction::up);
-            head_shape = ACS_UARROW;
           } else
             s.move(Direction::down);
           break;
@@ -88,7 +85,6 @@ int main(int argc, char **argv) {
         case 'A':
           if (s.current_dir != Direction::right) {
             s.move(Direction::left);
-            head_shape = ACS_LARROW;
           } else
             s.move(Direction::right);
           break;
@@ -96,7 +92,6 @@ int main(int argc, char **argv) {
         case 'S':
           if (s.current_dir != Direction::up) {
             s.move(Direction::down);
-            head_shape = ACS_DARROW;
           } else
             s.move(Direction::up);
           break;
@@ -104,7 +99,6 @@ int main(int argc, char **argv) {
         case 'D':
           if (s.current_dir != Direction::left) {
             s.move(Direction::right);
-            head_shape = ACS_RARROW;
           } else
             s.move(Direction::left);
           break;
@@ -118,11 +112,52 @@ int main(int argc, char **argv) {
         attron(COLOR_PAIR(SNAKE_COLOUR)); // Snake is red-black
         // Draw snake body
         while (cursor->next) {
-          mvaddch(cursor->y + 2, cursor->x, '*');
+          switch (cursor->dir) {
+          case Direction::up:
+          case Direction::down:
+            mvaddch(cursor->y + 2, cursor->x, ACS_VLINE);
+            break;
+          case Direction::left:
+          case Direction::right:
+            mvaddch(cursor->y + 2, cursor->x, ACS_HLINE);
+            break;
+          case Direction::upleft:
+          case Direction::rightdown:
+            mvaddch(cursor->y + 2, cursor->x, ACS_URCORNER);
+            break;
+          case Direction::upright:
+          case Direction::leftdown:
+            mvaddch(cursor->y + 2, cursor->x, ACS_ULCORNER);
+            break;
+          case Direction::downleft:
+          case Direction::rightup:
+            mvaddch(cursor->y + 2, cursor->x, ACS_LRCORNER);
+            break;
+          case Direction::downright:
+          case Direction::leftup:
+            mvaddch(cursor->y + 2, cursor->x, ACS_LLCORNER);
+            break;
+          }
           cursor = cursor->next;
         }
         // Head drawn last
-        mvaddch(cursor->y + 2, cursor->x, head_shape);
+        switch (cursor->dir) {
+        case Direction::left:
+          mvaddch(cursor->y + 2, cursor->x, ACS_LARROW);
+          break;
+        case Direction::up:
+          mvaddch(cursor->y + 2, cursor->x, ACS_UARROW);
+          break;
+        case Direction::right:
+          mvaddch(cursor->y + 2, cursor->x, ACS_RARROW);
+          break;
+        case Direction::down:
+          mvaddch(cursor->y + 2, cursor->x, ACS_DARROW);
+          break;
+        default:
+          mvaddch(cursor->y + 2, cursor->x, ACS_DARROW);
+        }
+
         attroff(COLOR_PAIR(SNAKE_COLOUR));
 
         // Draw food

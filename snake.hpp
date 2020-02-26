@@ -8,13 +8,14 @@ using namespace std;
 class SnakeSegment {
 public:
   int x, y;
+  Direction dir;
   SnakeSegment *next;
-  SnakeSegment(int _x, int _y);
+  SnakeSegment(int _x, int _y, Direction _d);
 };
-
 class Snake {
-  public : SnakeSegment *front,
-             *back; // Note: reversed queue (front is back, freedom is slavery)
+public:
+  SnakeSegment *front,
+      *back; // Note: reversed queue (front is back, freedom is slavery)
   bool growing;
   int w, h;
   Direction current_dir;
