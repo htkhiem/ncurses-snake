@@ -7,6 +7,7 @@
 #include <ncurses.h>
 #include <string>
 #include <unistd.h>
+#include <cstdio>
 
 #define WIDTH 80
 #define HEIGHT 24
@@ -31,13 +32,22 @@ void DrawBorder(WINDOW *main_window, size_t width, size_t height, int score) {
 int main(int argc, char **argv) {
   initscr();       // Init ncurses window
   noecho();        // Don't display keypresses
-  curs_set(FALSE); // Don't display cursor
+  curs_set(false); // Don't display cursor
 
+  if (!has_colors()) {
+    endwin();
+    printf("Your terminal does not have colour support. Exiting...");
+    return 1;
+  }
+  
   // Window height = playing field height + 2 to accomodate title bar
   WINDOW *main_window =
       newwin(HEIGHT + 2, WIDTH, (LINES - HEIGHT) / 2, (COLS - WIDTH) / 2);
   nodelay(main_window, true); // Snake never stops
 
+  start_color();
+  init_pair(1, COLOR_BLACK, COLOR_RED);
+  
   char input = 0;
   Snake s(WIDTH, HEIGHT);
   int score = 0; // Starts at snake length = 2
@@ -98,6 +108,8 @@ int main(int argc, char **argv) {
         }
 
         SnakeSegment *cursor = s.back;
+
+	attron(COLOR_PAIR(1)); // Snake is red-black
         // Draw snake body
         while (cursor->next) {
           mvwaddch(main_window, cursor->y + 2, cursor->x, '*');
@@ -105,7 +117,8 @@ int main(int argc, char **argv) {
         }
         // Head drawn last
         mvwaddch(main_window, cursor->y + 2, cursor->x, head_shape);
-
+	attroff(COLOR_PAIR(1));
+	
         // Draw food
         mvwaddch(main_window, food_y + 2, food_x, ACS_DIAMOND);
 
